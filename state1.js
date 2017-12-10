@@ -21,26 +21,17 @@ demo.state1 = function(){};
 demo.state1.prototype = {
     preload: function(){
         
-        game.load.image('explosion', 'Explosion.png');
-        selection = game.add.group();
-        selection.enableBody = true;
-        selection.physicsBodyType = Phaser.Physics.ARCADE;
-        selection.createMultiple(50, 'explosion');
-        selection.setAll('checkWorldBounds', true);
-        selection.setAll('outOfBoundsKill', true);
         
+
+        game.load.image('explosion', 'Explosion');
         game.load.image('ball', 'blue_ball.png');
         game.load.audio('crowd_boo', "crowd_boo.mp3");
         game.load.audio('crowd_cheer', "crowd_cheer.mp3");
-        cheer = game.add.audio('crowd_cheer')
-        boo = game.add.audio('crowd_boo')
+        game.load.audio('party_horn', "party_horn.mp3")
+        game.load.image('confetti', 'confetti');
+
         
-        
-        game.load.image('confetti', 'confetti.png');
-        //emitter for kill effects
-        emitter = game.add.emitter(0, 0, 50);
-        emitter.makeParticles('confetti');
-        emitter.gravity = 1;
+
         //  Phaser can load Text files.
 
         //  It does this using an XMLHttpRequest.
@@ -53,6 +44,22 @@ demo.state1.prototype = {
     },
     
     create: function(){
+        
+        cheer = game.add.audio('crowd_cheer')
+        boo = game.add.audio('crowd_boo')
+        horn = game.add.audio('party_horn')
+        
+        selection = game.add.group();
+        selection.enableBody = true;
+        selection.physicsBodyType = Phaser.Physics.ARCADE;
+        selection.createMultiple(50, 'explosion');
+        selection.setAll('checkWorldBounds', true);
+        selection.setAll('outOfBoundsKill', true);
+        
+        //emitter for kill effects
+        emitter = game.add.emitter(50, 50, 50);
+        emitter.makeParticles('confetti');
+        emitter.gravity = 3;
         
         game.physics.startSystem(Phaser.Physics.ARCADE);
         
@@ -67,8 +74,6 @@ demo.state1.prototype = {
         //this is the question
             if(answer == 0){
                 question = lines[line]
-                console.log("question is:")        
-                console.log(question)
                 questions.push(question)
             }
         
@@ -88,15 +93,11 @@ demo.state1.prototype = {
             answer += 1;
             if (answer == 5){
                 correct_ans = lines[line]
-                console.log("answer is:")
-                console.log(correct_ans)
                 answers.push(correct_ans)
 
                 var answer = 0;
             } 
         }
-        console.log(answers)
-        console.log(questions)
 
         text = txt.split('\n');
         var style = {font: '22px Arial', fill: '#00000'};
@@ -180,6 +181,7 @@ demo.state1.prototype = {
             nans_active = true;
         }
         
+        console.log(counter);
         questionText.fixedToCamera = true;
         
 },
@@ -230,7 +232,7 @@ function correct_collisionHandler (choice, ball) {
     score += 1;
     particleBurst(ball.x,ball.y);
     scoreText.text = 'Score: ' + score;
-    //cheer.play();
+    cheer.play();
     console.log(counter += 1)
 }
 
@@ -249,7 +251,8 @@ function particleBurst(x, y){
     emitter.x = x;
     emitter.y = y;
     
-    emitter.start(true, 500, null, 5);
+    emitter.start(true, 2000, null, 5);
+    horn.play();
     
     
 }
