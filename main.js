@@ -1,4 +1,4 @@
 var game = new Phaser.Game(600, 400, Phaser.AUTO);
-game.state.add('state1', demo.state1);
-
-game.state.start('state1')
+game.state.add('gameQuiz', demo.gameQuiz);
+game.state.add('gameover', demo.gameover);
+game.state.start('gameQuiz')

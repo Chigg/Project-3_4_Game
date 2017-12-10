@@ -14,21 +14,25 @@ var nextFire = 0;
 
 var scoreText;
 var score = 0;
+var music;
+
+var style = {font: '22px Arial', fill: '#00000'};
 
 //This is the core game area
 //var emitter;
-demo.state1 = function(){};
-demo.state1.prototype = {
+demo.gameQuiz = function(){};
+demo.gameQuiz.prototype = {
     preload: function(){
         
         
 
-        game.load.image('explosion', 'Explosion');
-        game.load.image('ball', 'blue_ball.png');
-        game.load.audio('crowd_boo', "crowd_boo.mp3");
-        game.load.audio('crowd_cheer', "crowd_cheer.mp3");
-        game.load.audio('party_horn', "party_horn.mp3")
-        game.load.image('confetti', 'confetti');
+        game.load.image('explosion', 'assets/Explosion');
+        game.load.image('ball', 'assets/blue_ball.png');
+        game.load.audio('crowd_boo', "assets/crowd_boo.mp3");
+        game.load.audio('crowd_cheer', "assets/crowd_cheer.mp3");
+        game.load.audio('party_horn', "assets/party_horn.mp3")
+        game.load.audio('music', "assets/quack_song.mp3")
+        game.load.image('confetti', 'assets/confetti');
 
         
 
@@ -48,7 +52,10 @@ demo.state1.prototype = {
         cheer = game.add.audio('crowd_cheer')
         boo = game.add.audio('crowd_boo')
         horn = game.add.audio('party_horn')
+        music = game.add.audio('music');
+        music.volume -= 0.5;
         
+        music.play()
         selection = game.add.group();
         selection.enableBody = true;
         selection.physicsBodyType = Phaser.Physics.ARCADE;
@@ -103,84 +110,8 @@ demo.state1.prototype = {
         var style = {font: '22px Arial', fill: '#00000'};
         
         counter = 0;
-        counter += 1
-        questionText = game.add.text(16,16, questions[counter], style)
-        
-        correct_label = game.add.text(20, 20, answers[counter], style)
-        
-        answer = answers[counter]
-        answer1 = ans1[counter]
-        answer2 = ans2[counter]
-        answer3 = ans3[counter]
-        ans_active = false;
-        fans_active = false;
-        nans_active = false;
-        quiz_len = questions.length;
-        
-        if(answer1 == answer){
-            correct_ball = game.add.sprite(500, 500, 'ball');
-            game.physics.enable(correct_ball, Phaser.Physics.ARCADE);
-            correct_ball.body.velocity.setTo(200, 200);
-            correct_ball.body.collideWorldBounds = true;
-            correct_ball.body.bounce.setTo(1,1);
-            correct_ball.addChild(correct_label);
-            correct_ball.inputEnabled = true;
-            correct_ball.input.useHandCursor = true;
-            console.log("created at answer 1")
-        }
-        else{
-            ans_ball = game.add.sprite(500, 500, 'ball');
-            game.physics.enable(ans_ball, Phaser.Physics.ARCADE);
-            ans_ball.body.velocity.setTo(200, 200);
-            ans_ball.body.collideWorldBounds = true;
-            ans_ball.body.bounce.setTo(1,1);
-            ans1_label = game.add.text(10, 10, answer1, style)
-            ans_ball.addChild(ans1_label);
-            ans_active = true;
-        }
-        if(answer2 == answer){
-            correct_ball = game.add.sprite(500, 500, 'ball');
-            game.physics.enable(correct_ball, Phaser.Physics.ARCADE);
-            correct_ball.body.velocity.setTo(200, 200);
-            correct_ball.body.collideWorldBounds = true;
-            correct_ball.body.bounce.setTo(1,1);
-            correct_ball.addChild(correct_label);
-            correct_ball.inputEnabled = true;
-            correct_ball.input.useHandCursor = true;
-            console.log("created at answer 2")
-        }
-        else{
-            Fans_ball = game.add.sprite(200, 500, 'ball');
-            game.physics.enable(Fans_ball, Phaser.Physics.ARCADE);
-            Fans_ball.body.velocity.setTo(200, 200);
-            Fans_ball.body.collideWorldBounds = true;
-            Fans_ball.body.bounce.setTo(1,1);
-            ans2_label = game.add.text(10, 10, answer2, style)
-            Fans_ball.addChild(ans2_label)
-            fans_active = true;
-        }
-        if(answer3 == answer){
-            correct_ball = game.add.sprite(200, 100, 'ball');
-            game.physics.enable(correct_ball, Phaser.Physics.ARCADE);
-            correct_ball.body.velocity.setTo(200, 200);
-            correct_ball.body.collideWorldBounds = true;
-            correct_ball.body.bounce.setTo(1,1);
-            correct_ball.addChild(correct_label);
-            correct_ball.inputEnabled = true;
-            correct_ball.input.useHandCursor = true;
-            console.log("created at answer 3")
-        }
-        else{
-            Nans_ball = game.add.sprite(200, 250, 'ball');
-            game.physics.enable(Nans_ball, Phaser.Physics.ARCADE);
-            Nans_ball.body.velocity.setTo(200, 200);
-            Nans_ball.body.collideWorldBounds = true;
-            Nans_ball.body.bounce.setTo(1,1);
-            ans3_label = game.add.text(10, 10, answer3, style)
-            Nans_ball.addChild(ans3_label)
-            nans_active = true;
-        }
-        
+        newRound(questions, answers, counter);
+    
         console.log(counter);
         questionText.fixedToCamera = true;
         
@@ -203,7 +134,6 @@ demo.state1.prototype = {
             {
                 makeSelection();
             }    
-
     }
 };
 
@@ -233,7 +163,10 @@ function correct_collisionHandler (choice, ball) {
     particleBurst(ball.x,ball.y);
     scoreText.text = 'Score: ' + score;
     cheer.play();
-    console.log(counter += 1)
+    endRound();
+    counter += 1;
+    newRound(questions, answers, counter);
+    console.log(counter)
 }
 
 function collisionHandler (choice, ball) {
@@ -255,4 +188,116 @@ function particleBurst(x, y){
     horn.play();
     
     
+}
+
+function newRound(questions, answers, counter){
+    
+        questionText = game.add.text(16,16, questions[counter], style)
+        correct_label = game.add.text(20, 20, answers[counter], style)
+        answer = answers[counter]
+        answer1 = ans1[counter]
+        answer2 = ans2[counter]
+        answer3 = ans3[counter]
+        ans_active = false;
+        fans_active = false;
+        nans_active = false;
+        quiz_len = (questions.length)-1;
+        console.log(quiz_len);
+        
+        if (quiz_len == counter){
+            endRound()
+            GameOver()
+        }
+    
+        if(answer1 == answer){
+            correct_ball = game.add.sprite(500, 500, 'ball');
+            game.physics.enable(correct_ball, Phaser.Physics.ARCADE);
+            correct_ball.body.velocity.setTo(200, 200);
+            correct_ball.body.collideWorldBounds = true;
+            correct_ball.body.bounce.setTo(1,1);
+            correct_ball.addChild(correct_label);
+            correct_ball.inputEnabled = true;
+            correct_ball.input.useHandCursor = true;
+            console.log("created at answer 1")
+        }
+        else{
+            ans_ball = game.add.sprite(400, 500, 'ball');
+            game.physics.enable(ans_ball, Phaser.Physics.ARCADE);
+            ans_ball.body.velocity.setTo(200, 200);
+            ans_ball.body.collideWorldBounds = true;
+            ans_ball.body.bounce.setTo(1,1);
+            ans1_label = game.add.text(10, 10, answer1, style)
+            ans_ball.addChild(ans1_label);
+            ans_active = true;
+        }
+        if(answer2 == answer){
+            correct_ball = game.add.sprite(100, 500, 'ball');
+            game.physics.enable(correct_ball, Phaser.Physics.ARCADE);
+            correct_ball.body.velocity.setTo(200, 200);
+            correct_ball.body.collideWorldBounds = true;
+            correct_ball.body.bounce.setTo(1,1);
+            correct_ball.addChild(correct_label);
+            correct_ball.inputEnabled = true;
+            correct_ball.input.useHandCursor = true;
+            console.log("created at answer 2")
+            
+        }
+        else{
+            Fans_ball = game.add.sprite(200, 500, 'ball');
+            game.physics.enable(Fans_ball, Phaser.Physics.ARCADE);
+            Fans_ball.body.velocity.setTo(200, 200);
+            Fans_ball.body.collideWorldBounds = true;
+            Fans_ball.body.bounce.setTo(1,1);
+            ans2_label = game.add.text(10, 10, answer2, style)
+            Fans_ball.addChild(ans2_label)
+            fans_active = true;
+        }
+        if(answer3 == answer){
+            correct_ball = game.add.sprite(230, 100, 'ball');
+            game.physics.enable(correct_ball, Phaser.Physics.ARCADE);
+            correct_ball.body.velocity.setTo(200, 200);
+            correct_ball.body.collideWorldBounds = true;
+            correct_ball.body.bounce.setTo(1,1);
+            correct_ball.addChild(correct_label);
+            correct_ball.inputEnabled = true;
+            correct_ball.input.useHandCursor = true;
+            console.log("created at answer 3")
+            
+        }
+        else{
+            Nans_ball = game.add.sprite(219, 250, 'ball');
+            game.physics.enable(Nans_ball, Phaser.Physics.ARCADE);
+            Nans_ball.body.velocity.setTo(200, 200);
+            Nans_ball.body.collideWorldBounds = true;
+            Nans_ball.body.bounce.setTo(1,1);
+            ans3_label = game.add.text(10, 10, answer3, style)
+            Nans_ball.addChild(ans3_label)
+            nans_active = true;
+        }
+}
+
+function endRound(){
+    if (typeof Nans_ball !== "undefined"){
+        Nans_ball.kill()
+    }
+    if (typeof ans_ball !== "undefined"){
+        ans_ball.kill()
+    }
+    if (typeof Fans_ball !== "undefined"){
+        Fans_ball.kill()
+    }
+    if (typeof correct_ball !== "undefined"){
+        Nans_ball.kill()
+    }
+    questionText.kill()
+}
+function checkIfGameover(quiz_len, counter){
+    if(counter > quiz_len){
+        GameOver();
+    }
+    
+}
+function GameOver(){
+    console.log("GAME OVER");
+    game.state.start("gameover")
 }
