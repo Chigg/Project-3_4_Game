@@ -30,6 +30,10 @@ demo.state1.prototype = {
         selection.setAll('outOfBoundsKill', true);
         
         game.load.image('ball', 'blue_ball.png');
+        game.load.audio('crowd_boo', "crowd_boo.mp3");
+        game.load.audio('crowd_cheer', "crowd_cheer.mp3");
+        cheer = game.add.audio('crowd_cheer')
+        boo = game.add.audio('crowd_boo')
         
         
         game.load.image('confetti', 'confetti.png');
@@ -54,7 +58,7 @@ demo.state1.prototype = {
         
         game.stage.backgroundColor = '#dabbed';
         game.scale.scleMode = Phaser.ScaleManager.SHOW_ALL;
-        scoreText = game.add.text(350, 16, 'SCORE: ' + score, {font: '30px', fill: '#000'});
+        scoreText = game.add.text(450, 16, 'SCORE: ' + score, {font: '22px Arial', fill: '#000'});
 
         var txt = game.cache.getText('txt');
         var lines = txt.split('\n');
@@ -196,10 +200,7 @@ demo.state1.prototype = {
         if(game.input.activePointer.isDown)
             {
                 makeSelection();
-            }
-          
-        
-            
+            }    
 
     }
 };
@@ -229,6 +230,7 @@ function correct_collisionHandler (choice, ball) {
     score += 1;
     particleBurst(ball.x,ball.y);
     scoreText.text = 'Score: ' + score;
+    //cheer.play();
     console.log(counter += 1)
 }
 
@@ -238,6 +240,7 @@ function collisionHandler (choice, ball) {
     choice.kill();
     ball.kill();
     score -= 1;
+    boo.play();
     scoreText.text = 'Score: ' + score;
 }
 
